@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hcy</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    #canvas {
+      display: block;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    var canvas = document.getElementById("canvas");
+    setWidthHeight();
+    var canvasObj = {
+      context: canvas.getContext("2d"),
+      width: canvas.offsetWidth,
+      height: canvas.offsetHeight,
+      img: new Image()
+    }
+    draw();
+
+    // 绘制
+    function draw() {
+      let dpr = window.devicePixelRatio;
+      // 获取style的宽高
+      let {
+        width: cssWidth,
+        height: cssHeight
+      } = canvas.getBoundingClientRect();
+      // 根据dpr，扩大canvas画布的像素，使1个canvas像素和1个物理像素相等
+      canvas.width = dpr * cssWidth;
+      canvas.height = dpr * cssHeight;
+      // 由于画布扩大，canvas的坐标系也跟着扩大，如果按照原先的坐标系绘图内容会缩小 所以需要将绘制比例放大
+      canvasObj.context.scale(dpr, dpr);
+      canvasObj.context.clearRect(0, 0, canvasObj.width, canvasObj.height);
+      canvasObj.context.fillStyle = "#273796";
+      canvasObj.context.fillRect(0, 0, canvasObj.width, canvasObj.height);
+      canvasObj.img.src = "./img/bg.jpg"
+      textureOverlay({
+        width: canvasObj.width,
+        height: 90,
+        img: canvasObj.img,
+        last: () => {
+          canvasObj.context.font = "bold 100px 微软雅黑";
+          canvasObj.context.textAlign = "center";
+          // 纹理文字
+          canvasObj.context.fillText("HUAHUA", canvasObj.width / 2, 90, canvasObj.width - 40);
+          canvasObj.context.font = "60px 微软雅黑";
+          canvasObj.context.fillText("Y", 40, 180, 40);
+          canvasObj.context.fillText("U", canvasObj.width - 40, 300, 40);
+
+          canvasObj.context.strokeStyle = "#fff";
+          // 左圆 
+          canvasObj.context.beginPath();
+          canvasObj.context.arc(40, 360, 10, 0, 2 * Math.PI, false);
+          canvasObj.context.closePath();
+          canvasObj.context.lineWidth = 3;
+          canvasObj.context.stroke();
+          // 左线
+          canvasObj.context.beginPath();
+          canvasObj.context.moveTo(30, 360);
+          canvasObj.context.lineTo(30, 260);
+          canvasObj.context.lineWidth = 1;
+          canvasObj.context.closePath();
+          canvasObj.context.stroke();
+
+          // 右圆
+          canvasObj.context.beginPath();
+          canvasObj.context.arc(canvasObj.width - 36, 140, 10, 0, 2 * Math.PI, false);
+          canvasObj.context.closePath();
+          canvasObj.context.lineWidth = 3;
+          canvasObj.context.stroke();
+          // 右线
+          canvasObj.context.beginPath();
+          canvasObj.context.moveTo(canvasObj.width - 26, 140);
+          canvasObj.context.lineTo(canvasObj.width - 26, 260);
+          canvasObj.context.lineWidth = 1;
+          canvasObj.context.closePath();
+          canvasObj.context.stroke();
+
+          canvasObj.context.fillStyle = "#fff";
+          canvasObj.context.font = "10px 微软雅黑";
+          canvasObj.context.textAlign = "left";
+          // 左侧文字
+          canvasObj.context.fillText(
+            "WHAT ARE YOUR THOUGHTS", 30,
+            200);
+          canvasObj.context.fillText(
+            "I AM MY OWN EXPRESSION", 30,
+            216);
+          canvasObj.context.fillText(
+            "WHAT DO YOU THINK OF IT", 30,
+            232);
+          canvasObj.context.fillText(
+            "MY WORLD,I AM ARROGANT", 30,
+            248);
+
+          canvasObj.context.textAlign = "right";
+          // 右侧文字
+          canvasObj.context.fillText(
+            "WHAT DO YOU SAY", canvasObj.width - 30,
+            320);
+          canvasObj.context.fillText(
+            "WHEN I AM STUPID OR JOKE", canvasObj.width - 30,
+            336);
+          canvasObj.context.fillText(
+            "WHAT DO YOU DO", canvasObj.width - 30,
+            352);
+          canvasObj.context.fillText(
+            "IMAGINE THAT I FALL DOWN", canvasObj.width - 30,
+            368);
+          canvasObj.img.src = "./img/hcy1.png" // 指定图像的文件地址
+          canvasObj.img.onload = function () {
+            // 绘图
+            canvasObj.context.drawImage(canvasObj.img, 0, 0, canvasObj.width, canvasObj.height);
+          }
+        }
+      })
+    }
+
+    // 换行文字
+    CanvasRenderingContext2D.prototype.wrapText = function (text, x, y, maxWidth, lineHeight) {
+      if (typeof text != 'string' || typeof x != 'number' || typeof y != 'number') {
+        return;
+      }
+
+      var context = this;
+      var canvas = context.canvas;
+
+      if (typeof maxWidth == 'undefined') {
+        maxWidth = (canvas && canvas.width) || 300;
+      }
+      if (typeof lineHeight == 'undefined') {
+        lineHeight = (canvas && parseInt(window.getComputedStyle(canvas).lineHeight)) || parseInt(window
+          .getComputedStyle(document.body).lineHeight);
+      }
+
+      // 字符分隔为数组
+      var arrText = text.split('');
+      var line = '';
+
+      for (var n = 0; n < arrText.length; n++) {
+        var testLine = line + arrText[n];
+        var metrics = context.measureText(testLine);
+        var testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          context.fillText(line, x, y);
+          line = arrText[n];
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      context.fillText(line, x, y);
+    };
+
+    // 绘制纹理文字
+    function textureOverlay(obj) {
+      let {
+        width,
+        height,
+        img,
+        last
+      } = obj;
+      // 渐变和纹理
+      var gradient, pattern;
+      // 创建材质canvas
+      var canvasPattern = document.createElement("canvas");
+      var contextUnder = canvasPattern.getContext("2d");
+      canvasPattern.width = 100;
+      canvasPattern.height = 90;
+
+      // 纹理对象，img指纹理图片对象
+      img.onload = function () {
+        pattern = contextUnder.createPattern(img, "repeat");
+        contextUnder.fillStyle = pattern;
+        contextUnder.fillRect(0, 0, width, height);
+
+        // 给当前context创建pattern
+        pattern = canvasObj.context.createPattern(canvasPattern, "repeat");
+
+        // 绘制文本
+        canvasObj.context.fillStyle = pattern;
+        last()
+      }
+    }
+
+    // 设置style宽高
+    function setWidthHeight() {
+      if (window.innerWidth >= 500) {
+        canvas.style.width = 500 + "px";
+      } else {
+        canvas.style.width = document.body.clientWidth + "px";
+      }
+      canvas.style.height = document.body.clientHeight + "px";
+    }
+  </script>
+</body>
+
+</html>
